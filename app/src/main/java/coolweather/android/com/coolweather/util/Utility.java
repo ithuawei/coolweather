@@ -2,6 +2,8 @@ package coolweather.android.com.coolweather.util;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +11,7 @@ import org.json.JSONObject;
 import coolweather.android.com.coolweather.db.City;
 import coolweather.android.com.coolweather.db.County;
 import coolweather.android.com.coolweather.db.Province;
+import coolweather.android.com.coolweather.gson.Weather;
 
 public class Utility {
 	/**
@@ -110,5 +113,34 @@ public class Utility {
 
 		}
 		return false;
+	}
+
+	/**
+	 * 将服务器返回的json数据解析成Weather实体类
+	 *
+	 * 查询详细天气： 广东->深圳 http://guolin.tech/api/weather?cityid=CN101280601&&key=b0f50aa612384ba7bef78e63c560138b
+	 *
+	 * { HeWeather: [ { aqi: {}, basic: {}, daily_forecast: [], hourly_forecast: [], now: {}, status: "ok", suggestion:
+	 * {} } ] }
+	 */
+	public static Weather handleWeatherResponse(String response) {
+		Weather weather = null;
+		try {
+			// ｛｝=》只有一个weather对象
+			JSONObject jsonObject = new JSONObject(response);
+			// {[]}只有一个数组
+			JSONArray heWeatherArray = jsonObject.getJSONArray("HeWeather");
+			// [ { aqi: {}, basic: {}, daily_forecast: [], hourly_forecast: [], now: {}, status: "ok", suggestion:* {} }
+			// ]
+			JSONObject weatherObject = heWeatherArray.getJSONObject(0);
+			// 为了获取“{ aqi: {}, basic: {}, daily_forecast: [], hourly_forecast: [], now: {}, status: "ok", suggestion:*
+			// {} }”
+			String weatherStr = weatherObject.toString();
+			Gson gson = new Gson();
+			weather = gson.fromJson(weatherStr, Weather.class);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return weather;
 	}
 }
