@@ -8,8 +8,8 @@ public class City extends DataSupport{
     //code是ID值
     private int cityCode;
     private String cityName;
-    //城市所属的省份
-    private String provinceNameName;
+    //城市所属的省份Id
+    private int provinceId;
 
     public int getId() {
         return id;
@@ -35,11 +35,11 @@ public class City extends DataSupport{
         this.cityName = cityName;
     }
 
-    public String getProvinceNameName() {
-        return provinceNameName;
+    public int getProvinceId() {
+        return provinceId;
     }
 
-    public void setProvinceNameName(String provinceNameName) {
-        this.provinceNameName = provinceNameName;
+    public void setProvinceId(int provinceId) {
+        this.provinceId = provinceId;
     }
 }
