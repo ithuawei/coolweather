@@ -82,7 +82,7 @@ public class Utility {
 	 * 
 	 * @param response
 	 * @param cityId
-	 *            所属城市ID
+	 *            所属城市id
 	 * @return
 	 */
 	public static boolean handleCountyResponse(String response, int cityId) {
