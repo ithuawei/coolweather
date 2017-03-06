@@ -3,6 +3,7 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name="org.litepal.LitePalApplication"
         android:allowBackup="true"
@@ -18,6 +19,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".ActivityWeather"/>
+
+        <service
+            android:name=".service.AutoDownLoadService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

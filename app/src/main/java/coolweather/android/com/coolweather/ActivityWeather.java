@@ -1,5 +1,6 @@
 package coolweather.android.com.coolweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import coolweather.android.com.coolweather.gson.Forecast;
 import coolweather.android.com.coolweather.gson.Weather;
+import coolweather.android.com.coolweather.service.AutoDownLoadService;
 import coolweather.android.com.coolweather.util.HttpUtil;
 import coolweather.android.com.coolweather.util.Utility;
 import okhttp3.Call;
@@ -89,7 +91,6 @@ public class ActivityWeather extends AppCompatActivity {
 		mTvCarWash = (TextView) findViewById(R.id.tv_car_wash);
 		mTvSport = (TextView) findViewById(R.id.tv_sport);
 
-		// 上次查询的城市，如果有就显示上次的，没有就去服务器查询
 		mSp = PreferenceManager.getDefaultSharedPreferences(this);
 		String weatherStr = mSp.getString("weather", null);
 
@@ -144,6 +145,13 @@ public class ActivityWeather extends AppCompatActivity {
 	}
 
 	private void showWeatherInfo(Weather weather) {
+		if (weather.status.equals("ok")) {
+			Intent intent = new Intent(this, AutoDownLoadService.class);
+			startService(intent);
+		} else {
+			Toast.makeText(this, "获取信息失败", Toast.LENGTH_SHORT).show();
+		}
+
 		String cityName = weather.basic.cityName;
 		/**
 		 * "2017-03-05 13:49" 获取 13:49
