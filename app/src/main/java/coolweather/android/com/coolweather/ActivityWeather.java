@@ -5,9 +5,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -42,6 +46,9 @@ public class ActivityWeather extends AppCompatActivity {
 	private TextView mTvSport;
 	private ImageView mIVBingPic;
 	private SharedPreferences mSp;
+	// 供Frgmend调用
+	public DrawerLayout mDrawerLayout;
+	public SwipeRefreshLayout mSwipeRefreshLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +60,20 @@ public class ActivityWeather extends AppCompatActivity {
 			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 			getWindow().setStatusBarColor(Color.TRANSPARENT);
 		}
-		//为了防止滚动的时候内容盖住状态栏，所以布局文件还需要加上fitsSystemWindows="true"
+		// 为了防止滚动的时候内容盖住状态栏，所以布局文件还需要加上fitsSystemWindows="true"
 		/*--------------沉浸状态栏end--------------*/
 		setContentView(R.layout.activity_weather);
 
 		// 初始化控件
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swip_refresh);
+		Button btnNav = (Button) findViewById(R.id.btn_nav);
+		btnNav.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mDrawerLayout.openDrawer(GravityCompat.START);
+			}
+		});
 		mIVBingPic = (ImageView) findViewById(R.id.iv_bing_pic);
 		mScWeatherLayout = (ScrollView) findViewById(R.id.sc_weather);
 		mTvTitleCity = (TextView) findViewById(R.id.tv_title_city);
@@ -181,21 +197,26 @@ public class ActivityWeather extends AppCompatActivity {
 		mLlForecast.setVisibility(View.VISIBLE);
 	}
 
-	private void requestWeather(final String weather_id) {
+	public void requestWeather(final String weather_id) {
 		String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weather_id
 				+ "&&key=b0f50aa612384ba7bef78e63c560138b";
 		HttpUtil.sendOkhttpRequest(weatherUrl, new Callback() {
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
 				String responseStr = response.body().string();
-				Weather weather = Utility.handleWeatherResponse(responseStr);
+				final Weather weather = Utility.handleWeatherResponse(responseStr);
 				// 主线程更新
 				if (weather != null && "ok".equals(weather.status)) {
 					SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(ActivityWeather.this).edit();
 					edit.putString("weather", responseStr);
 					edit.apply();
 					// 显示
-					showWeatherInfo(weather);
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							showWeatherInfo(weather);
+						}
+					});
 				}
 			}
 

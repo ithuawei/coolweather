@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import coolweather.android.com.coolweather.ActivityWeather;
+import coolweather.android.com.coolweather.MainActivity;
 import coolweather.android.com.coolweather.R;
 import coolweather.android.com.coolweather.db.City;
 import coolweather.android.com.coolweather.db.County;
@@ -93,11 +94,28 @@ public class ChooseAreaFragment extends Fragment {
 					queryAndDisplayCounties();
 				} else if (mCurrentLevel == LEVEL_COUNTY) {
 					String weatherId = mCountyList.get(position).getWeatherId();
-					Intent intent = new Intent(getActivity(), ActivityWeather.class);
-					intent.putExtra("weather_id", weatherId);
-					startActivity(intent);
-                    getActivity().finish();
-                }
+					/**
+					 * 判断当前的fragment是在MainActivty还是在显示天气的ActivityWeather
+					 * 
+					 * 1.如果是Main，那么是跳转
+					 * 
+					 * 2.如果是WeatherActivity，那么就关闭菜单，并显示下拉刷新，然后请求城市信息即可。
+					 */
+					if (getActivity() instanceof MainActivity) {
+						Intent intent = new Intent(getActivity(), ActivityWeather.class);
+						intent.putExtra("weather_id", weatherId);
+						startActivity(intent);
+						getActivity().finish();
+					} else if (getActivity() instanceof ActivityWeather) {
+						/**
+						 * 1.获取活动实例 2.活动关闭菜单 3.显示刷新图案 4.请求天气信息
+						 */
+						ActivityWeather activity = (ActivityWeather) getActivity();
+						activity.mDrawerLayout.closeDrawers();
+						activity.mSwipeRefreshLayout.setRefreshing(true);
+						activity.requestWeather(weatherId);
+					}
+				}
 			}
 		});
 		// 返回按钮的处理:(无按钮)省<-市级<-县级
