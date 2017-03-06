@@ -26,6 +26,15 @@ android {
             signingConfig signingConfigs.config
         }
     }
+    //多渠道打包
+//    productFlavors {
+//        qihoo {
+//            applicationId "com.coolweater.android.qihoo"
+//        }
+//        baidu {
+//            applicationId "com.coolweater.android.baidu"
+//        }
+//    }
 }
 
 dependencies {
