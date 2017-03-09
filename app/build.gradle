@@ -12,18 +12,19 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
-        config {
-            storeFile file(KEY_PATH)
-            storePassword KEY_PWD
-            keyAlias KEY_ALIAS
-            keyPassword ALIAS_PWD
-        }
+        //KEY_XXX 如果不这么写就用单引号表示‘’
+//        config {
+//            storeFile file(KEY_PATH)
+//            storePassword KEY_PWD
+//            keyAlias KEY_ALIAS
+//            keyPassword ALIAS_PWD
+//        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
         }
     }
     //多渠道打包
