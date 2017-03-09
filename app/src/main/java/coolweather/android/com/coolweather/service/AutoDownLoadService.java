@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -86,7 +87,7 @@ public class AutoDownLoadService extends Service {
 	}
 
 	private void downLoadPic() {
-		String picUrl = "http://guolin.tech/api/china";
+		String picUrl = "http://guolin.tech/api/bing_pic";
 		// 请求该地址,返回一个真实的图片地址,保存这个真实的图片地址即可
 		HttpUtil.sendOkhttpRequest(picUrl, new Callback() {
 			@Override

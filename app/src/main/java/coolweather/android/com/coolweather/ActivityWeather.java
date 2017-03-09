@@ -51,6 +51,7 @@ public class ActivityWeather extends AppCompatActivity {
 	// 供Frgmend调用
 	public DrawerLayout mDrawerLayout;
 	public SwipeRefreshLayout mSwipeRefreshLayout;
+	private String mWeatherId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,13 +98,20 @@ public class ActivityWeather extends AppCompatActivity {
 		if (weatherStr != null) {
 			// 有缓存直接解析
 			Weather weather = Utility.handleWeatherResponse(weatherStr);
+			mWeatherId = weather.basic.weatherId;
 			showWeatherInfo(weather);
 		} else {
 			// 无缓存,去获取JSON
-			String weather_id = getIntent().getStringExtra("weather_id");
+			mWeatherId = getIntent().getStringExtra("weather_id");
 			mLlForecast.setVisibility(View.INVISIBLE);
-			requestWeather(weather_id);
+			requestWeather(mWeatherId);
 		}
+		mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				requestWeather(mWeatherId);
+			}
+		});
 		// http://cn.bing.com/az/hprichbg/rb/SteepSheep_ZH-CN8716398488_1920x1080.jpg
 		String bingPicStr = mSp.getString("bing_pic", null);
 		if (bingPicStr != null) {
@@ -211,21 +219,25 @@ public class ActivityWeather extends AppCompatActivity {
 		HttpUtil.sendOkhttpRequest(weatherUrl, new Callback() {
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
-				String responseStr = response.body().string();
+				final String responseStr = response.body().string();
 				final Weather weather = Utility.handleWeatherResponse(responseStr);
-				// 主线程更新
-				if (weather != null && "ok".equals(weather.status)) {
-					SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(ActivityWeather.this).edit();
-					edit.putString("weather", responseStr);
-					edit.apply();
-					// 显示
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						// 主线程更新
+						if (weather != null && "ok".equals(weather.status)) {
+							SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(
+									ActivityWeather.this).edit();
+							edit.putString("weather", responseStr);
+							edit.apply();
+							// 显示
 							showWeatherInfo(weather);
+						} else {
+							Toast.makeText(ActivityWeather.this, "请求天气失败", Toast.LENGTH_SHORT).show();
 						}
-					});
-				}
+						mSwipeRefreshLayout.setRefreshing(false);
+					}
+				});
 			}
 
 			@Override
@@ -234,6 +246,7 @@ public class ActivityWeather extends AppCompatActivity {
 					@Override
 					public void run() {
 						Toast.makeText(ActivityWeather.this, "获取信息失败", Toast.LENGTH_SHORT).show();
+						mSwipeRefreshLayout.setRefreshing(false);
 					}
 				});
 			}
